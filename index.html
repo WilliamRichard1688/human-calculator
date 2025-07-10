@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Human Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .background-shapes {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape:nth-child(2) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        .shape:nth-child(3) {
+            width: 40px;
+            height: 40px;
+            bottom: 30%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .app-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 30px;
+            padding: 0;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.2);
+            width: 95%;
+            max-width: 400px;
+            color: #1a1a1a;
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px 25px 25px;
+            text-align: center;
+            position: relative;
+        }
+
+        .app-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .app-subtitle {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .content-area {
+            padding: 25px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1;
+        }
+
+        .timer-value {
+            color: #dc3545;
+        }
+
+        .question-card {
+            background: #ffffff;
+            border-radius: 20px;
+            padding: 35px 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            position: relative;
+            transition: all 0.4s ease;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .question-card.correct {
+            background: #28a745;
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 12px 35px rgba(40, 167, 69, 0.3);
+        }
+
+        .question-card.incorrect {
+            background: #dc3545;
+            color: white;
+            animation: shake 0.6s ease-in-out;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
+        }
+
+        .question-text {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #1a1a1a;
+            letter-spacing: -0.5px;
+        }
+
+        .question-card.correct .question-text,
+        .question-card.incorrect .question-text {
+            color: white;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 18px 20px;
+            font-size: 20px;
+            text-align: center;
+            border: 2px solid #e9ecef;
+            border-radius: 16px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            background: #f8f9fa;
+        }
+
+        .answer-input:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        .combo-badge {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            background: linear-gradient(45deg, #ff6b6b, #ffd93d);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 14px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transform: scale(0);
+            transition: all 0.3s ease;
+        }
+
+        .combo-badge.show {
+            transform: scale(1);
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            padding: 16px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: none;
+            letter-spacing: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f8f9fa;
+            color: #495057;
+            border: 1px solid #dee2e6;
+        }
+
+        .btn-secondary:active {
+            transform: scale(0.98);
+            background: #e9ecef;
+        }
+
+        .btn-full {
+            grid-column: 1 / -1;
+        }
+
+        .difficulty-selector {
+            margin: 25px 0;
+        }
+
+        .difficulty-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #1a1a1a;
+            text-align: center;
+        }
+
+        .difficulty-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .difficulty-btn {
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 16px;
+            color: #495057;
+            text-align: center;
+        }
+
+        .difficulty-btn.selected {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .difficulty-btn:active {
+            transform: scale(0.98);
+        }
+
+        .feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 60px;
+            font-weight: 700;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            transition: all 0.5s ease;
+        }
+
+        .feedback.show {
+            opacity: 1;
+            animation: feedbackPop 0.8s ease;
+        }
+
+        @keyframes feedbackPop {
+            0% { transform: translate(-50%, -50%) scale(0); }
+            50% { transform: translate(-50%, -50%) scale(1.2); }
+            100% { transform: translate(-50%, -50%) scale(1); }
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            padding: 20px;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 25px;
+            padding: 35px 30px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: all 0.3s ease;
+            max-width: 350px;
+            width: 100%;
+            color: #1a1a1a;
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #1a1a1a;
+        }
+
+        .final-score {
+            font-size: 48px;
+            font-weight: 700;
+            margin: 20px 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .high-score-badge {
+            background: linear-gradient(45deg, #ffd93d, #ff6b6b);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            font-weight: 700;
+            margin: 20px 0;
+            display: inline-block;
+            font-size: 14px;
+            animation: glow 2s infinite alternate;
+        }
+
+        @keyframes glow {
+            0% { box-shadow: 0 0 20px rgba(255, 107, 107, 0.5); }
+            100% { box-shadow: 0 0 30px rgba(255, 107, 107, 0.8); }
+        }
+
+        .stats-summary {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .stats-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-weight: 500;
+        }
+
+        .stats-value {
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .menu-screen {
+            display: block;
+        }
+
+        .game-screen {
+            display: none;
+        }
+
+        .high-score-display {
+            text-align: center;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .high-score-label {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .high-score-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        /* iPhone specific optimizations */
+        @media (max-width: 414px) {
+            .app-container {
+                width: 100%;
+                max-width: 100%;
+                border-radius: 0;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .content-area {
+                flex: 1;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .stats-grid {
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 12px 8px;
+            }
+
+            .question-card {
+                padding: 30px 20px;
+            }
+
+            .question-text {
+                font-size: 28px;
+            }
+
+            .answer-input {
+                font-size: 18px;
+                padding: 16px 18px;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .app-container {
+                background: rgba(28, 28, 30, 0.95);
+                color: white;
+            }
+
+            .stat-card {
+                background: #2c2c2e;
+                border-color: #38383a;
+            }
+
+            .stat-value {
+                color: white;
+            }
+
+            .question-card {
+                background: #1c1c1e;
+                border-color: #38383a;
+            }
+
+            .question-text {
+                color: white;
+            }
+
+            .answer-input {
+                background: #2c2c2e;
+                border-color: #38383a;
+                color: white;
+            }
+
+            .answer-input:focus {
+                background: #1c1c1e;
+                border-color: #667eea;
+            }
+
+            .btn-secondary {
+                background: #2c2c2e;
+                color: white;
+                border-color: #38383a;
+            }
+
+            .difficulty-btn {
+                background: #2c2c2e;
+                color: white;
+                border-color: #38383a;
+            }
+
+            .high-score-display,
+            .stats-summary {
+                background: #2c2c2e;
+                border-color: #38383a;
+            }
+
+            .difficulty-title,
+            .modal-title {
+                color: white;
+            }
+
+            .stats-value {
+                color: white;
+            }
+
+            .high-score-value {
+                color: white;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+
+    <div class="app-container">
+        <div id="menuScreen" class="menu-screen">
+            <div class="app-header">
+                <h1 class="app-title">Calculator Pro</h1>
+                <p class="app-subtitle">Test your mental math skills</p>
+            </div>
+            
+            <div class="content-area">
+                <div class="high-score-display">
+                    <div class="high-score-label">Personal Best</div>
+                    <div class="high-score-value" id="highScoreDisplay">0</div>
+                </div>
+
+                <div class="difficulty-selector">
+                    <div class="difficulty-title">Choose Difficulty</div>
+                    <div class="difficulty-grid">
+                        <button class="difficulty-btn selected" data-difficulty="easy">
+                            Easy · Numbers 1-20
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="medium">
+                            Medium · Numbers 1-50
+                        </button>
+                        <button class="difficulty-btn" data-difficulty="hard">
+                            Hard · Numbers 1-100
+                        </button>
+                    </div>
+                </div>
+
+                <div class="button-grid">
+                    <button class="btn btn-primary btn-full" id="startBtn">
+                        Start Game
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameScreen" class="game-screen">
+            <div class="app-header">
+                <h1 class="app-title">Calculator Pro</h1>
+                <p class="app-subtitle">Time Attack Mode</p>
+            </div>
+            
+            <div class="content-area">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="score">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Time</div>
+                        <div class="stat-value timer-value" id="timer">60</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Streak</div>
+                        <div class="stat-value" id="streak">0</div>
+                    </div>
+                </div>
+
+                <div class="question-card" id="questionCard">
+                    <div class="question-text" id="question">Get Ready...</div>
+                    <input type="number" class="answer-input" id="answerInput" placeholder="Enter answer" disabled>
+                    <div class="combo-badge" id="comboBadge">
+                        🔥 <span id="comboValue">0</span>x
+                    </div>
+                </div>
+
+                <div class="button-grid">
+                    <button class="btn btn-secondary" id="pauseBtn">Pause</button>
+                    <button class="btn btn-secondary" id="backToMenuBtn">Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <div class="modal-overlay" id="gameOverModal">
+        <div class="modal-content">
+            <h2 class="modal-title">🎉 Game Complete!</h2>
+            <div class="final-score" id="finalScore">0</div>
+            <div id="highScoreBadge" class="high-score-badge" style="display: none;">
+                🏆 New Personal Best!
+            </div>
+            <div class="stats-summary">
+                <div class="stats-row">
+                    <span class="stats-label">Questions:</span>
+                    <span class="stats-value" id="questionsAnswered">0</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Accuracy:</span>
+                    <span class="stats-value" id="accuracy">0%</span>
+                </div>
+                <div class="stats-row">
+                    <span class="stats-label">Best Streak:</span>
+                    <span class="stats-value" id="bestStreak">0</span>
+                </div>
+            </div>
+            <div class="button-grid">
+                <button class="btn btn-primary btn-full" id="playAgainBtn">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class CalculatorProGame {
+            constructor() {
+                this.score = 0;
+                this.timeLeft = 60;
+                this.streak = 0;
+                this.bestStreak = 0;
+                this.combo = 0;
+                this.questionsAnswered = 0;
+                this.correctAnswers = 0;
+                this.currentAnswer = 0;
+                this.gameActive = false;
+                this.gamePaused = false;
+                this.difficulty = 'easy';
+                this.gameTimer = null;
+                this.operations = ['+', '-', '×', '÷'];
+                
+                this.initElements();
+                this.bindEvents();
+                this.loadHighScore();
+                this.updateHighScoreDisplay();
+                this.setupTouchOptimizations();
+            }
+
+            initElements() {
+                this.menuScreen = document.getElementById('menuScreen');
+                this.gameScreen = document.getElementById('gameScreen');
+                this.questionEl = document.getElementById('question');
+                this.answerInput = document.getElementById('answerInput');
+                this.scoreEl = document.getElementById('score');
+                this.timerEl = document.getElementById('timer');
+                this.streakEl = document.getElementById('streak');
+                this.comboBadge = document.getElementById('comboBadge');
+                this.comboValue = document.getElementById('comboValue');
+                this.feedback = document.getElementById('feedback');
+                this.gameOverModal = document.getElementById('gameOverModal');
+                this.finalScore = document.getElementById('finalScore');
+                this.highScoreBadge = document.getElementById('highScoreBadge');
+                this.questionsAnsweredEl = document.getElementById('questionsAnswered');
+                this.accuracyEl = document.getElementById('accuracy');
+                this.bestStreakEl = document.getElementById('bestStreak');
+                this.highScoreDisplay = document.getElementById('highScoreDisplay');
+                this.questionCard = document.getElementById('questionCard');
+            }
+
+            setupTouchOptimizations() {
+                // Prevent zoom on input focus
+                this.answerInput.addEventListener('focus', () => {
+                    document.querySelector('meta[name=viewport]').setAttribute('content', 
+                        'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+                });
+
+                // Restore zoom after blur
+                this.answerInput.addEventListener('blur', () => {
+                    document.querySelector('meta[name=viewport]').setAttribute('content', 
+                        'width=device-width, initial-scale=1.0, user-scalable=no');
+                });
+
+                // Haptic feedback simulation
+                this.addHapticFeedback();
+            }
+
+            addHapticFeedback() {
+                // Add subtle visual feedback for button presses
+                document.querySelectorAll('.btn, .difficulty-btn').forEach(btn => {
+                    btn.addEventListener('touchstart', () => {
+                        btn.style.transform = 'scale(0.95)';
+                    });
+                    btn.addEventListener('touchend', () => {
+                        setTimeout(() => {
+                            btn.style.transform = '';
+                        }, 150);
+                    });
+                });
+            }
+
+            bindEvents() {
+                document.getElementById('startBtn').addEventListener('click', () => this.startGame());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.togglePause());
+                document.getElementById('backToMenuBtn').addEventListener('click', () => this.backToMenu());
+                document.getElementById('playAgainBtn').addEventListener('click', () => this.playAgain());
+                
+                this.answerInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        this.submitAnswer();
+                    }
+                });
+
+                this.answerInput.addEventListener('input', (e) => {
+                    // Auto-submit if answer looks complete (avoid single digits for harder problems)
+                    const value = e.target.value;
+                    if (value && !isNaN(value) && this.shouldAutoSubmit(value)) {
+                        setTimeout(() => this.submitAnswer(), 200);
+                    }
+                });
+
+                // Difficulty selection
+                document.querySelectorAll('.difficulty-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        document.querySelectorAll('.difficulty-btn').forEach(b => b.classList.remove('selected'));
+                        e.target.classList.add('selected');
+                        this.difficulty = e.target.dataset.difficulty;
+                    });
+                });
+
+                // Modal close on background click
+                this.gameOverModal.addEventListener('click', (e) => {
+                    if (e.target === this.gameOverModal) {
+                        this.gameOverModal.classList.remove('show');
+                    }
+                });
+            }
+
+            shouldAutoSubmit(value) {
+                // Auto-submit logic based on expected answer length
+                const num = parseInt(value);
+                if (this.currentAnswer < 10 && value.length >= 1) return true;
+                if (this.currentAnswer < 100 && value.length >= 2) return true;
+                if (this.currentAnswer >= 100 && value.length >= 3) return true;
+                return false;
+            }
+
+            startGame() {
+                this.resetGame();
+                this.menuScreen.style.display = 'none';
+                this.gameScreen.style.display = 'block';
+                this.gameActive = true;
+                this.answerInput.disabled = false;
+                this.generateQuestion();
+                this.startTimer();
+                setTimeout(() => this.answerInput.focus(), 100);
+            }
+
+            resetGame() {
+                this.score = 0;
+                this.timeLeft = 60;
+                this.streak = 0;
+                this.bestStreak = 0;
+                this.combo = 0;
+                this.questionsAnswered = 0;
+                this.correctAnswers = 0;
+                this.gameActive = false;
+                this.gamePaused = false;
+                this.updateDisplay();
+                this.hideComboBadge();
+            }
+
+            generateQuestion() {
+                let num1, num2, operation, answer;
+                const range = this.getDifficultyRange();
+                
+                operation = this.operations[Math.floor(Math.random() * this.operations.length)];
+                
+                switch (operation) {
+                    case '+':
+                        num1 = Math.floor(Math.random() * range) + 1;
+                        num2 = Math.floor(Math.random() * range) + 1;
+                        answer = num1 + num2;
+                        break;
+                    case '-':
+                        num1 = Math.floor(Math.random() * range) + 10;
+                        num2 = Math.floor(Math.random() * num1) + 1;
+                        answer = num1 - num2;
+                        break;
+                    case '×':
+                        num1 = Math.floor(Math.random() * Math.min(range/3, 12)) + 1;
+                        num2 = Math.floor(Math.random() * Math.min(range/3, 12)) + 1;
+                        answer = num1 * num2;
+                        break;
+                    case '÷':
+                        answer = Math.floor(Math.random() * Math.min(range/2, 15)) + 1;
+                        num2 = Math.floor(Math.random() * Math.min(range/4, 10)) + 1;
+                        num1 = answer * num2;
+                        break;
+                }
+                
+                this.currentAnswer = answer;
+                this.questionEl.textContent = `${num1} ${operation} ${num2}`;
+                this.answerInput.value = '';
+                this.answerInput.focus();
+            }
+
+            getDifficultyRange() {
+                switch (this.difficulty) {
+                    case 'easy': return 20;
+                    case 'medium': return 50;
+                    case 'hard': return 100;
+                    default: return 20;
+                }
+            }
+
+            submitAnswer() {
+                if (!this.gameActive || this.gamePaused) return;
+                
+                const userAnswer = parseInt(this.answerInput.value);
+                if (isNaN(userAnswer)) return;
+                
+                this.questionsAnswered++;
+                
+                if (userAnswer === this.currentAnswer) {
+                    this.handleCorrectAnswer();
+                } else {
+                    this.handleIncorrectAnswer();
+                }
+                
+                setTimeout(() => {
+                    this.generateQuestion();
+                    this.updateDisplay();
+                }, 400);
+            }
+
+            handleCorrectAnswer() {
+                this.correctAnswers++;
+                this.streak++;
+                this.bestStreak = Math.max(this.bestStreak, this.streak);
+                
+                let points = 10;
+                
+                // Difficulty multiplier
+                switch (this.difficulty) {
+                    case 'medium': points *= 1.5; break;
+                    case 'hard': points *= 2; break;
+                }
+                
+                // Streak bonus
+                if (this.streak >= 5) {
+                    this.combo = Math.floor(this.streak / 5);
+                    points *= (1 + this.combo * 0.5);
+                    this.showComboBadge();
+                }
+                
+                this.score += Math.floor(points);
+                this.showFeedback('✓', '#28a745');
+                this.animateCorrect();
+            }
+
+            handleIncorrectAnswer() {
+                this.streak = 0;
+                this.combo = 0;
+                this.hideComboBadge();
+                this.showFeedback('✗', '#dc3545');
+                this.animateIncorrect();
+            }
+
+            showComboBadge() {
+                this.comboValue.textContent = this.combo;
+                this.comboBadge.classList.add('show');
+            }
+
+            hideComboBadge() {
+                this.comboBadge.classList.remove('show');
+            }
+
+            showFeedback(text, color) {
+                this.feedback.textContent = text;
+                this.feedback.style.color = color;
+                this.feedback.classList.add('show');
+                setTimeout(() => {
+                    this.feedback.classList.remove('show');
+                }, 800);
+            }
+
+            animateCorrect() {
+                this.questionCard.classList.add('correct');
+                setTimeout(() => {
+                    this.questionCard.classList.remove('correct');
+                }, 400);
+            }
+
+            animateIncorrect() {
+                this.questionCard.classList.add('incorrect');
+                setTimeout(() => {
+                    this.questionCard.classList.remove('incorrect');
+                }, 600);
+            }
+
+            startTimer() {
+                this.gameTimer = setInterval(() => {
+                    if (!this.gamePaused) {
+                        this.timeLeft--;
+                        this.updateDisplay();
+                        
+                        if (this.timeLeft <= 0) {
+                            this.endGame();
+                        }
+                    }
+                }, 1000);
+            }
+
+            togglePause() {
+                this.gamePaused = !this.gamePaused;
+                document.getElementById('pauseBtn').textContent = this.gamePaused ? 'Resume' : 'Pause';
+                this.answerInput.disabled = this.gamePaused;
+                
+                if (this.gamePaused) {
+                    this.questionEl.textContent = 'Game Paused';
+                    this.answerInput.placeholder = 'Tap Resume to continue';
+                } else {
+                    this.generateQuestion();
+                    this.answerInput.placeholder = 'Enter answer';
+                    setTimeout(() => this.answerInput.focus(), 100);
+                }
+            }
+
+            endGame() {
+                this.gameActive = false;
+                clearInterval(this.gameTimer);
+                this.answerInput.disabled = true;
+                
+                // Calculate final statistics
+                this.finalScore.textContent = this.score;
+                this.questionsAnsweredEl.textContent = this.questionsAnswered;
+                this.accuracyEl.textContent = this.questionsAnswered > 0 ? 
+                    Math.round((this.correctAnswers / this.questionsAnswered) * 100) + '%' : '0%';
+                this.bestStreakEl.textContent = this.bestStreak;
+                
+                // Check for high score
+                const highScore = this.loadHighScore();
+                if (this.score > highScore) {
+                    this.saveHighScore(this.score);
+                    this.highScoreBadge.style.display = 'block';
+                    this.updateHighScoreDisplay();
+                } else {
+                    this.highScoreBadge.style.display = 'none';
+                }
+                
+                // Show game over modal with delay for better UX
+                setTimeout(() => {
+                    this.gameOverModal.classList.add('show');
+                }, 500);
+            }
+
+            backToMenu() {
+                if (this.gameActive) {
+                    this.gameActive = false;
+                    clearInterval(this.gameTimer);
+                }
+                this.gameScreen.style.display = 'none';
+                this.menuScreen.style.display = 'block';
+            }
+
+            playAgain() {
+                this.gameOverModal.classList.remove('show');
+                setTimeout(() => {
+                    this.startGame();
+                }, 300);
+            }
+
+            updateDisplay() {
+                this.scoreEl.textContent = this.score.toLocaleString();
+                this.timerEl.textContent = this.timeLeft;
+                this.streakEl.textContent = this.streak;
+                
+                // Add urgency animation when time is low
+                if (this.timeLeft <= 10) {
+                    this.timerEl.parentElement.style.animation = 'pulse 0.5s infinite';
+                } else {
+                    this.timerEl.parentElement.style.animation = '';
+                }
+            }
+
+            loadHighScore() {
+                // Use in-memory storage instead of localStorage
+                return this.highScore || 0;
+            }
+
+            saveHighScore(score) {
+                // Use in-memory storage instead of localStorage
+                this.highScore = score;
+            }
+
+            updateHighScoreDisplay() {
+                this.highScoreDisplay.textContent = this.loadHighScore().toLocaleString();
+            }
+        }
+
+        // Initialize the game when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            new CalculatorProGame();
+        });
+    </script>
+</body>
+</html>
+                
